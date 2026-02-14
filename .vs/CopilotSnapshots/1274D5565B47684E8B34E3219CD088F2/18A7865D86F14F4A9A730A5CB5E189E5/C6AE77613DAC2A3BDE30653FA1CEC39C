@@ -1,0 +1,58 @@
+﻿using Microsoft.EntityFrameworkCore;
+using WorkFlow.Domain.Interfaces;
+using WorkFlow.Domain.Exceptions;
+using WorkFlow.Domain.Models;
+using WorkFlow.Infra.Persistence.Write.Context;
+
+namespace WorkFlow.Infra.Persistence.Write.Repositories
+{
+    internal class RequestRepository(AppDbContext context) : IRequestRepository
+    {
+        public async Task AddAsync(RequestModel request)
+        {
+            await context.AddAsync(request);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<RequestModel?> GetByIdAsync(Guid id)
+        {
+            return await context.Requests
+                .Include(r => r.History)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task UpdateAsync(Guid id,RequestModel request)
+        {
+            var exists = await context.Requests.AsNoTracking().AnyAsync(r => r.Id == id);
+            if (!exists)
+            {
+                throw new NotFoundException("Request not found.");
+            }
+
+            context.Requests.Update(request);
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // If concurrency conflict, re-check existence and throw NotFound if deleted
+                var stillExists = await context.Requests.AsNoTracking().AnyAsync(r => r.Id == id);
+                if (!stillExists)
+                    throw new NotFoundException("Request not found.");
+
+                throw;
+            }
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var request = await GetByIdAsync(id);
+            if (request != null)
+            {
+                context.Requests.Remove(request);
+                await context.SaveChangesAsync();
+            }
+        }
+    }
+}

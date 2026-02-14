@@ -1,0 +1,106 @@
+﻿using Dapper;
+using Microsoft.AspNetCore.Connections;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
+using WorkFlow.Application.DTOs;
+using WorkFlow.Application.Interfaces;
+using WorkFlow.Application.Queries;
+using WorkFlow.Infra.Persistence.Write.Context;
+
+namespace WorkFlow.Infra.Persistence.Read.Repositories
+{
+    public class RequestQueriesRepository(AppDbContext context, IDbConnectionFactory dbConnection) : IRequestQueriesRepository
+    {
+        public async Task<RequestDetailDto?> GetDetailByIdAsync(Guid requestId)
+        {
+            return await context.Requests
+        .AsNoTracking()
+        .Where(x => x.Id == requestId)
+        .Select(r => new RequestDetailDto(
+            r.Id,
+            r.Title,
+            r.Description,
+            r.Category.ToString(),
+            r.Priority.ToString(),
+            r.Status.ToString(),
+            r.CreatedByUserId,
+            r.CreatedAt,
+            r.UpdatedAt,
+            // Projeção do Histórico
+            r.History.Select(h => new RequestHistoryDto(
+                h.FromStatus.HasValue ? h.FromStatus.Value.ToString() : null,
+                h.ToStatus.ToString(),
+                h.ChangedBy,
+                h.ChangedAt,
+                h.Comment
+            )).ToList()
+        ))
+        .FirstOrDefaultAsync();
+        }
+
+        public async Task<PagedResult<RequestListingDto>> GetFilteredRequestsAsync(RequestFilter filter, string userId, string role)
+        {
+            using var connection = dbConnection.CreateConnection();
+            var parameters = new DynamicParameters();
+
+            // 1. Construímos a base dos filtros (Reutilizável)
+            var filterSql = new StringBuilder(" WHERE 1=1 ");
+
+            if (role != "Manager")
+            {
+                filterSql.Append(" AND CreatedByUserId = @userId ");
+                parameters.Add("userId", userId);
+            }
+
+            if (filter.Status.HasValue)
+            {
+                filterSql.Append(" AND Status = @status ");
+                parameters.Add("status", (int)filter.Status.Value);
+            }
+
+            // 2. Montamos os dois comandos SQL
+            var sql = new StringBuilder();
+
+            // Primeiro comando: Conta o total de registros com aqueles filtros
+            sql.AppendLine("SELECT COUNT(*) FROM Requests" + filterSql + ";");
+
+            // Segundo comando: Pega os dados paginados
+            // select columns in the same order expected by RequestListingDto constructor
+            sql.AppendLine("SELECT Id, Title, Description, Category, Priority, Status, CreatedAt FROM Requests");
+            sql.Append(filterSql);
+            sql.AppendLine(" ORDER BY CreatedAt DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;");
+
+            // Ensure page and pageSize are valid to avoid negative OFFSET
+            var page = filter.Page < 1 ? 1 : filter.Page;
+            var pageSize = filter.PageSize <= 0 ? 10 : filter.PageSize;
+
+            parameters.Add("skip", (page - 1) * pageSize);
+            parameters.Add("take", pageSize);
+
+            // 3. Execução múltipla (Uma única viagem ao banco)
+            using var multi = await connection.QueryMultipleAsync(sql.ToString(), parameters);
+
+            var totalCount = await multi.ReadFirstAsync<int>();
+            var items = await multi.ReadAsync<RequestListingDto>();
+
+            return new PagedResult<RequestListingDto>(items, totalCount);
+        }
+
+        public async Task<IEnumerable<RequestHistoryDto>> GetRequestHistoryAsync(Guid requestId)
+        {
+                return await context.Requests
+                    .AsNoTracking()
+                    .Where(x => x.Id == requestId)
+                    .SelectMany(r => r.History) // "Achata" a lista de histórico da solicitação
+                    .OrderByDescending(h => h.ChangedAt) // Requisito: Timeline (mais recentes primeiro)
+                    .Select(h => new RequestHistoryDto(
+                        h.FromStatus.HasValue ? h.FromStatus.Value.ToString() : null,
+                        h.ToStatus.ToString(),
+                        h.ChangedBy,
+                        h.ChangedAt,
+                        h.Comment
+                    ))
+                    .ToListAsync();
+        }
+    }
+}

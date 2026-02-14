@@ -1,0 +1,83 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using WorkFlow.Application.Commands.ApproveRequest;
+using WorkFlow.Application.Commands.CreateRequest;
+using WorkFlow.Application.Commands.RejectRequest;
+using WorkFlow.Application.DTOs;
+using WorkFlow.Application.Queries;
+
+namespace WorkFlow.API.Controllers
+{
+    [ApiController]
+    [Route("api/request")]
+    [Authorize]
+    public class RequestsController(IRequestQueriesRepository queries) : ControllerBase
+    {
+
+        [HttpPost]
+        public async Task<IActionResult> Create(
+            [FromBody] CreateRequestDto dto,
+            [FromServices] CreateRequestCommandHandler handler)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var command = new CreateRequestCommand(dto.Title, dto.Description, dto.Category, dto.Priority, userId!);
+
+            await handler.HandleAsync(command);
+            return StatusCode(201);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            return Ok(await queries.GetFilteredRequestsAsync(filter, userId!, userRole!));
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var request = await queries.GetDetailByIdAsync(id);
+            if (request == null) return NotFound();
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (userRole != "Manager" && request.CreatedByUser != userId) return Forbid();
+
+            return Ok(request);
+        }
+
+        [HttpPost("{id:guid}/approve")]
+        [Authorize(Roles = "manager")]
+        public async Task<IActionResult> approve(
+            Guid id,
+            [FromBody] ApprovalDto dto,
+            [FromServices] ApproveRequestCommandHandler handler)
+        {
+            var managerid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await handler.Handle(id, managerid!, dto.comment);
+            return Ok(new { message = "solicitação aprovada com sucesso." });
+        }
+
+        [HttpPost("{id:guid}/reject")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> Reject(
+            Guid id,
+            [FromBody] RejectionDto dto,
+            [FromServices] RejectionRequestCommandHandler handler)
+        {
+            var managerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await handler.Handle(id, managerId!, dto.comment);
+            return Ok(new { message = "Solicitação rejeitada." });
+        }
+
+        [HttpGet("{id:guid}/history")]
+        public async Task<IActionResult> GetHistory(Guid id)
+        {
+            var history = await queries.GetRequestHistoryAsync(id);
+            return Ok(history);
+        }
+    }
+}

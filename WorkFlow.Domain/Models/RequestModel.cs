@@ -1,0 +1,119 @@
+﻿using WorkFlow.Domain.Enuns;
+using WorkFlow.Domain.Exceptions;
+
+namespace WorkFlow.Domain.Models
+{
+    public class RequestModel
+    {
+        public Guid Id { get; private set; }
+        public string Title { get; private set; }
+        public string Description { get; private set; }
+        public RequestCategoryEnum Category { get; private set; }
+        public RequestPriorityEnum Priority { get; private set; }
+        public RequestStatusEnum Status { get; private set; }
+
+        public string CreatedByUserId { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; private set; }
+
+        private readonly List<RequestHistoryModel> history = new();
+        public IReadOnlyCollection<RequestHistoryModel> History => history;
+
+        protected RequestModel() { }
+
+        public RequestModel(
+            string title,
+            string description,
+            RequestCategoryEnum category,
+            RequestPriorityEnum priority,
+            string createdByUserId)
+        {
+            Id = Guid.NewGuid();
+            Title = title;
+            Description = description;
+            Category = category;
+            Priority = priority;
+            Status = RequestStatusEnum.Pending;
+
+            CreatedByUserId = createdByUserId;
+            CreatedAt = DateTime.UtcNow;
+
+            AddHistory(null, RequestStatusEnum.Pending, createdByUserId, "Request created");
+        }
+
+        public static RequestModel CreateRequest(string title, string description, RequestCategoryEnum category, RequestPriorityEnum priority, string createdByUserId)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                throw new BusinessException("Title is required.");
+
+            if (title.Length > 200)
+                throw new BusinessException("Title must be at most 200 characters.");
+
+            if (string.IsNullOrWhiteSpace(description))
+                throw new BusinessException("Description is required.");
+
+            if (description.Length > 2000)
+                throw new BusinessException("Description must be at most 2000 characters.");
+
+            if (string.IsNullOrWhiteSpace(createdByUserId))
+                throw new BusinessException("CreatedByUserId is required.");
+
+            if (!Enum.IsDefined(typeof(RequestCategoryEnum), category))
+                throw new BusinessException("Invalid category.");
+
+            if (!Enum.IsDefined(typeof(RequestPriorityEnum), priority))
+                throw new BusinessException("Invalid priority.");
+
+            return new RequestModel(title, description, category, priority, createdByUserId);
+        }
+
+        public void Approve(string managerId, string? comment)
+        {
+            if (string.IsNullOrWhiteSpace(managerId))
+                throw new BusinessException("ManagerId is required to approve the request.");
+
+            if (Status != RequestStatusEnum.Pending)
+                throw new BusinessException("Only pending requests can be approved.");
+
+            if (comment != null && comment.Length > 1000)
+                throw new BusinessException("Comment must be at most 1000 characters.");
+
+            var previousStatus = Status;
+
+            Status = RequestStatusEnum.Approved;
+            UpdatedAt = DateTime.UtcNow;
+
+            AddHistory(previousStatus, Status, managerId, comment);
+        }
+
+        public void Reject(string managerId, string comment)
+        {
+            if (string.IsNullOrWhiteSpace(managerId))
+                throw new BusinessException("ManagerId is required to reject the request.");
+
+            if (Status != RequestStatusEnum.Pending)
+                throw new BusinessException("Only pending requests can be rejected.");
+
+            if (string.IsNullOrWhiteSpace(comment))
+                throw new BusinessException("Comment is required when rejecting.");
+
+            if (comment.Length > 2000)
+                throw new BusinessException("Comment must be at most 2000 characters.");
+
+            var previousStatus = Status;
+
+            Status = RequestStatusEnum.Rejected;
+            UpdatedAt = DateTime.UtcNow;
+
+            AddHistory(previousStatus, Status, managerId, comment);
+        }
+
+        private void AddHistory(RequestStatusEnum? from,RequestStatusEnum to,string changedBy,string? comment)
+        {
+            if (string.IsNullOrWhiteSpace(changedBy))
+                throw new BusinessException("ChangedBy is required for history entries.");
+
+            history.Add(new RequestHistoryModel(Id,from,to,changedBy,comment));
+        }
+    }
+}

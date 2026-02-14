@@ -1,0 +1,19 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using WorkFlow.Application.Commands.ApproveRequest;
+using WorkFlow.Application.Commands.Auth;
+using WorkFlow.Application.Commands.CreateRequest;
+
+namespace WorkFlow.Application.DepencicyInjection
+{
+    public static class ApplicationModule
+    {
+        public static IServiceCollection AddApplicationModule(this IServiceCollection services)
+        {
+            services.AddScoped<LoginCommandHandler>();
+            services.AddScoped<CreateRequestCommandHandler>();
+            services.AddScoped<ApproveRequestCommandHandler>();
+            services.AddScoped<RejectRequestCommandHandler>();
+            return services;
+        }
+    }
+}

@@ -1,0 +1,89 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using WorkFlow.Domain.Enuns;
+using WorkFlow.Domain.Exceptions;
+
+namespace WorkFlow.Domain.Models
+{
+    public class RequestModel
+    {
+        public Guid Id { get; private set; }
+        public string Title { get; private set; }
+        public string Description { get; private set; }
+        public RequestCategoryEnum Category { get; private set; }
+        public RequestPriorityEnum Priority { get; private set; }
+        public RequestStatusEnum Status { get; private set; }
+
+        public string CreatedByUserId { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; private set; }
+
+        private readonly List<RequestHistoryModel> _history = new();
+        public IReadOnlyCollection<RequestHistoryModel> History => _history;
+
+        protected RequestModel() { }
+
+        public RequestModel(
+            string title,
+            string description,
+            RequestCategoryEnum category,
+            RequestPriorityEnum priority,
+            string createdByUserId)
+        {
+            Id = Guid.NewGuid();
+            Title = title;
+            Description = description;
+            Category = category;
+            Priority = priority;
+            Status = RequestStatusEnum.Pending;
+
+            CreatedByUserId = createdByUserId;
+            CreatedAt = DateTime.UtcNow;
+
+            AddHistory(null, RequestStatusEnum.Pending, createdByUserId, "Request created");
+        }
+
+        public static RequestModel CreateRequest(string title, string description, RequestCategoryEnum category, RequestPriorityEnum priority, string createdByUserId)
+        {
+            if(string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(description), string.IsNullOrWhiteSpace(createdByUserId))
+                return new BusinessException("");
+            return new RequestModel(title, description, category, priority, createdByUserId);
+        }
+
+        public void Approve(string managerId, string? comment)
+        {
+            if (Status != RequestStatusEnum.Pending)
+                throw new InvalidOperationException("Only pending requests can be approved.");
+
+            var previousStatus = Status;
+
+            Status = RequestStatusEnum.Approved;
+            UpdatedAt = DateTime.UtcNow;
+
+            AddHistory(previousStatus, Status, managerId, comment);
+        }
+
+        public void Reject(string managerId, string comment)
+        {
+            if (Status != RequestStatusEnum.Pending)
+                throw new InvalidOperationException("Only pending requests can be rejected.");
+
+            if (string.IsNullOrWhiteSpace(comment))
+                throw new ArgumentException("Comment is required when rejecting.");
+
+            var previousStatus = Status;
+
+            Status = RequestStatusEnum.Rejected;
+            UpdatedAt = DateTime.UtcNow;
+
+            AddHistory(previousStatus, Status, managerId, comment);
+        }
+
+        private void AddHistory(RequestStatusEnum? from,RequestStatusEnum to,string changedBy,string? comment)
+        {
+            _history.Add(new RequestHistoryModel(Id,from,to,changedBy,comment
+            ));
+        }
+    }
+}

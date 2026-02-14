@@ -1,0 +1,81 @@
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WorkFlow.Application.Commands.ApproveRequest;
+using WorkFlow.Application.Commands.CreateRequest;
+using WorkFlow.Application.DTOs;
+using WorkFlow.Application.Queries;
+using WorkFlow.Domain.Interfaces;
+
+namespace WorkFlow.Api.Controllers
+{
+    [ApiController]
+    [Route("api/request")]
+    public class RequestController(CreateRequestCommandHandler command, ApproveRequestCommandHandler approveReqCommand) : ControllerBase
+    {
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Create([FromBody] CreateRequestCommand command)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? command.UserId;
+            var cmd = command with { UserId = userId };
+
+            await createHandler.HandleAsync(cmd);
+
+            return Ok(new { Message = "Solicitação criada com sucesso." });
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var detail = await queries.GetDetailByIdAsync(id);
+            if (detail == null) return NotFound();
+            return Ok(detail);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+
+            var result = await queries.GetFilteredRequestsAsync(filter, userId, role);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}/approve")]
+        [Authorize]
+        public async Task<IActionResult> Approve(Guid id, [FromBody] ApproveRequestDto dto)
+        {
+            var managerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? dto.ManagerId;
+
+            var request = await repository.GetByIdAsync(id);
+            if (request == null) return NotFound();
+
+            request.Approve(managerId!, dto.Comment);
+            await repository.UpdateAsync(id, request);
+
+            return Ok(new { Message = "Solicitação aprovada com sucesso." });
+        }
+
+        [HttpPut("{id}/reject")]
+        [Authorize]
+        public async Task<IActionResult> Reject(Guid id, [FromBody] RejectRequestDto dto)
+        {
+            var managerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? dto.ManagerId;
+
+            var request = await repository.GetByIdAsync(id);
+            if (request == null) return NotFound();
+
+            request.Reject(managerId!, dto.Comment);
+            await repository.UpdateAsync(id, request);
+
+            return Ok(new { Message = "Solicitação rejeitada com sucesso." });
+        }
+
+        private record ApproveRequestDto(string? ManagerId, string? Comment);
+        private record RejectRequestDto(string ManagerId, string Comment);
+    }
+}

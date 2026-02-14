@@ -1,0 +1,15 @@
+services:
+  workFlow.SqlServer:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "admin123"
+    ports:
+    - 1433:1433
+    volumes:
+    - sqlserver_data:/var/opt/mssql
+    restart: always
+
+volumes:
+  sqlserver_data:

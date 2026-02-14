@@ -1,0 +1,93 @@
+﻿using Microsoft.EntityFrameworkCore;
+using WorkFlow.Domain.Interfaces;
+using WorkFlow.Domain.Exceptions;
+using WorkFlow.Domain.Models;
+using WorkFlow.Infra.Persistence.Write.Context;
+
+namespace WorkFlow.Infra.Persistence.Write.Repositories
+{
+    internal class RequestRepository(AppDbContext context) : IRequestRepository
+    {
+        public async Task AddAsync(RequestModel request)
+        {
+            await context.AddAsync(request);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<RequestModel?> GetByIdAsync(Guid id)
+        {
+            return await context.Requests
+                .Include(r => r.History)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task UpdateAsync(Guid id,RequestModel request)
+        {
+            var existing = await context.Requests
+                .Include(r => r.History)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (existing is null)
+                throw new NotFoundException("Request not found.");
+
+            // Update scalar properties explicitly to avoid touching navigation collections
+            existing.Title = request.Title;
+            existing.Description = request.Description;
+            existing.Category = request.Category;
+            existing.Priority = request.Priority;
+            existing.Status = request.Status;
+            existing.UpdatedAt = request.UpdatedAt ?? DateTime.UtcNow;
+
+            // Synchronize history: add only new entries (do not replace existing collection)
+            foreach (var hist in request.History)
+            {
+                if (!existing.History.Any(h => h.Id == hist.Id))
+                {
+                    // ensure the history is linked to the existing request id
+                    // (domain usually sets RequestId in the constructor but enforce it here)
+                    // if hist.RequestId is not set or differs, set to existing.Id
+                    // hist.RequestId is private set; create a new instance if necessary
+                    if (hist.RequestId != existing.Id)
+                    {
+                        var newHist = new RequestHistoryModel(existing.Id, hist.FromStatus, hist.ToStatus, hist.ChangedBy, hist.Comment);
+                        await context.RequestHistories.AddAsync(newHist);
+                    }
+                    else
+                    {
+                        await context.RequestHistories.AddAsync(hist);
+                    }
+                }
+                else
+                {
+                    // optionally update existing history entries if necessary
+                    // var existingHist = existing.History.First(h => h.Id == hist.Id);
+                    // context.Entry(existingHist).CurrentValues.SetValues(hist);
+                }
+            }
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Re-check existence: if deleted, throw NotFound, otherwise surface concurrency
+                var stillExists = await context.Requests.AsNoTracking().AnyAsync(r => r.Id == id);
+                if (!stillExists)
+                    throw new NotFoundException("Request not found.");
+
+                throw new BusinessException("The request was modified by another process. Please reload and try again.");
+            }
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var request = await GetByIdAsync(id);
+            if (request != null)
+            {
+                context.Requests.Remove(request);
+                await context.SaveChangesAsync();
+            }
+        }
+    }
+}

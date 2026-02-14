@@ -1,0 +1,21 @@
+﻿using WorkFlow.Domain.Interfaces;
+
+namespace WorkFlow.Application.Commands.ApproveRequest
+{
+    public class ApproveRequestCommandHandler(IRequestRepository repository)
+    {
+
+        public async Task Handle(Guid requestId, string managerId, string comment)
+        {
+            // 1. Busca a entidade rica
+            var request = await repository.GetByIdAsync(requestId);
+            if (request == null) throw new Exception("Solicitação não encontrada.");
+
+            // 2. Executa a lógica de negócio protegida na Model
+            request.Approve(managerId, comment);
+
+            // 3. Persiste a mudança
+            await repository.UpdateAsync(request);
+        }
+    }
+}

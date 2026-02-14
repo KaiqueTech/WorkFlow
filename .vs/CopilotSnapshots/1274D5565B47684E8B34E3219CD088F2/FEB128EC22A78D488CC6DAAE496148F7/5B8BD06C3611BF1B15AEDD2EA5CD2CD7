@@ -1,0 +1,17 @@
+﻿using WorkFlow.Domain.Interfaces;
+
+namespace WorkFlow.Application.Commands.RejectRequest
+{
+    public class RejectionRequestCommandHandler(IRequestRepository repository)
+    {
+        public async Task Handle(Guid requestId, string managerId, string comment)
+        {
+            var request = await repository.GetByIdAsync(requestId);
+            if (request == null) throw new Exception("Solicitação não encontrada.");
+
+            request.Reject(managerId, comment);
+
+            await repository.UpdateAsync(request);
+        }
+    }
+}

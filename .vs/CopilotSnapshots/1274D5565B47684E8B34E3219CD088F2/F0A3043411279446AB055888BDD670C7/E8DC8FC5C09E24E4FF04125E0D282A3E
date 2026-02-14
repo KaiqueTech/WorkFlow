@@ -1,0 +1,12 @@
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace WorkFlow.Api.Controllers
+{
+    [ApiController]
+    [Route("api/request")]
+    public class RequestController : ControllerBase
+    {
+        [HttpPost]
+        public async Task<IActionResult> CreateRequest() { }
+    }
+}

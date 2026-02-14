@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Items/">
+    <File Path="docker-compose.yaml" />
+  </Folder>
+  <Project Path="WorkFlow.Api/WorkFlow.Api.csproj" />
+  <Project Path="WorkFlow.Application/WorkFlow.Application.csproj" />
+  <Project Path="WorkFlow.Domain/WorkFlow.Domain.csproj" />
+  <Project Path="WorkFlow.Infra/WorkFlow.Infra.csproj" />
+</Solution>
