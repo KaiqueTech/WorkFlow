@@ -13,7 +13,6 @@ namespace WorkFlow.Infra.Persistence.Read.Repositories
         {
             using var connection = dbConnection.CreateConnection();
 
-            // 1. Busca a solicitação
             var sqlRequest = """
                                  SELECT 
                                  Id, Title, Description, 
@@ -30,7 +29,6 @@ namespace WorkFlow.Infra.Persistence.Read.Repositories
 
             if (request == null) return null;
 
-            // 2. Busca o histórico
             var sqlHistory = """
                                 SELECT CAST(FromStatus AS VARCHAR) AS FromStatus, 
                                 CAST(ToStatus AS VARCHAR) AS ToStatus, 
@@ -92,10 +90,10 @@ namespace WorkFlow.Infra.Persistence.Read.Repositories
             sql.Append(filterSql);
             sql.AppendLine(" ORDER BY CreatedAt DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;");
 
-            var page = filter.Page < 1 ? 1 : filter.Page;
-            var pageSize = filter.PageSize <= 0 ? 10 : filter.PageSize;
+            var page = filter.Page;
+            var pageSize = filter.PageSize;
 
-            parameters.Add("skip", (page - 1) * pageSize);
+            parameters.Add("skip", page * pageSize);
             parameters.Add("take", pageSize);
 
             using var multi = await connection.QueryMultipleAsync(sql.ToString(), parameters);

@@ -1,56 +1,93 @@
 <div class="p-8 bg-[#09090b] min-h-screen text-zinc-100 font-sans">
   
-  <div class="flex justify-between items-start mb-10">
+  <div class="flex justify-between items-center mb-10">
     <div>
       <h1 class="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
-      <p class="text-zinc-500 mt-1">Gerencie e acompanhe suas solicitações em tempo real.</p>
+      <p class="text-zinc-500 mt-1 text-sm">Gerencie suas solicitações em um só lugar.</p>
     </div>
     
     <div class="flex items-center gap-3">
       <button (click)="adicionarNova()" 
               class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
-        <mat-icon class=" !text-md">add_circle_outline</mat-icon>
+        <mat-icon>add_circle_outline</mat-icon>
         Nova Solicitação
       </button>
 
       <button (click)="logOut()" 
-              class="p-2.5 text-zinc-300 hover:text-red-400 hover:bg-red-400/10 border border-zinc-600 hover:border-red-400/20 rounded-xl transition-all"
-              title="Sair do sistema">
-        <mat-icon class="!text-md">logout</mat-icon>
+              class="p-2.5 text-zinc-300 hover:text-red-400 border border-zinc-800 rounded-xl transition-all">
+        <mat-icon>logout</mat-icon>
       </button>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-    <div class="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl shadow-sm">
-      <p class="text-zinc-500 text-sm font-medium uppercase tracking-wider">Total de Pedidos</p>
-      <h3 class="text-3xl font-bold mt-2">{{ requests.length }}</h3>
+  <div class="flex items-center justify-between mb-2 bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800">
+    
+    <div class="relative flex-1 max-w-2xl">
+      <mat-icon class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 !text-[20px]">search</mat-icon>
+      <input type="text" 
+             (input)="aoBuscar($event)"
+             placeholder="Pesquise por título" 
+             class="w-full bg-black border border-zinc-800 rounded-xl py-3 pl-12 pr-4 text-sm focus:border-indigo-500 transition-all placeholder:text-zinc-600">
     </div>
-    <div class="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl shadow-sm">
-      <p class="text-zinc-500 text-sm font-medium uppercase tracking-wider">Status</p>
-      <h3 class="text-3xl font-bold mt-2 text-yellow-500">{{ requests.length > 0 ? 'Sincronizado' : 'Vazio' }}</h3>
-    </div>
-    <div class="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl shadow-sm text-green-500">
-      <p class="text-zinc-500 text-sm font-medium uppercase tracking-wider">Servidor</p>
-      <h3 class="text-3xl font-bold mt-2 italic text-green-500">Online</h3>
+
+      <div class="flex flex-wrap items-center gap-4 bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800">
+  
+  <select (change)="aoMudarStatus($event)" class="bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-sm text-amber-50 ">
+    <option value="">Todos os Status</option>
+    <option value="0">Pendente</option>
+    <option value="1">Aprovado</option>
+    <option value="2">Rejeitado</option>
+  </select>
+
+  <select (change)="aoMudarCategoria($event)" class="bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-sm text-amber-50 ">
+    <option value="">Todas as Categorias</option>
+    <option value="1">Compras</option>
+    <option value="2">TI</option>
+    <option value="3">Reembolso</option>
+  </select>
+
+  <select (change)="aoMudarPrioridade($event)" class="bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-sm text-amber-50">
+    <option value="">Todas as Prioridades</option>
+    <option value="0">Baixa</option>
+    <option value="1">Média</option>
+    <option value="2">Alta</option>
+  </select>
+</div>
+
+<div class="px-6 py-4 bg-zinc-800/20 border-t border-zinc-800 flex items-center justify-between" *ngIf="!loading && requests.length > 0">
+  <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+    Página <span class="text-indigo-400">{{ paginaAtual + 1 }}</span>
+  </div>
+
+  <div class="flex gap-2">
+    <button (click)="mudarPagina(paginaAtual - 1)" [disabled]="paginaAtual === 0"
+      class="flex items-center gap-1 px-4 py-2 text-[10px] font-bold uppercase border border-zinc-800 rounded-lg hover:bg-zinc-800 disabled:opacity-20 transition-all">
+      <mat-icon class="!text-sm">chevron_left</mat-icon> Anterior
+    </button>
+    
+    <button (click)="mudarPagina(paginaAtual + 1)" [disabled]="requests.length < 10"
+      class="flex items-center gap-1 px-4 py-2 text-[10px] font-bold uppercase border border-zinc-800 rounded-lg hover:bg-zinc-800 disabled:opacity-20 transition-all">
+      Próximo <mat-icon class="!text-sm">chevron_right</mat-icon>
+    </button>
+  </div>
+</div>
+
+    <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-6 py-2 bg-black/20 rounded-lg border border-zinc-800/30">
+      {{ requests.length }} Resultados
     </div>
   </div>
 
-  <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden backdrop-blur-sm shadow-xl">
+  <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
     
     <div *ngIf="loading" class="flex flex-col items-center justify-center py-24">
       <div class="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-      <p class="text-zinc-500 animate-pulse font-medium">Sincronizando dados...</p>
-    </div>
-
-    <div *ngIf="errorMessage && !loading" class="m-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-center">
-      {{ errorMessage }}
+      <p class="text-zinc-500 animate-pulse font-medium">Sincronizando...</p>
     </div>
 
     <table *ngIf="!loading && requests.length > 0" class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-zinc-800/30 text-zinc-400 text-[10px] uppercase tracking-[0.15em] font-bold">
-          <th class="px-6 py-4">Solicitação / Categoria</th>
+          <th class="px-6 py-4">Solicitação</th>
           <th class="px-6 py-4 text-center">Prioridade</th>
           <th class="px-6 py-4">Status</th>
           <th class="px-6 py-4 text-right">Ações</th>
@@ -58,69 +95,35 @@
       </thead>
       <tbody class="divide-y divide-zinc-800/50">
         <tr *ngFor="let req of requests" class="group hover:bg-zinc-800/20 transition-all duration-200">
-          
           <td class="px-6 py-5">
             <div class="flex flex-col gap-1">
-              <span class="text-zinc-100 font-medium group-hover:text-indigo-400 transition-colors">
-                {{ req.title }}
-              </span>
-              <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter bg-zinc-800/50 w-fit px-2 py-0.5 rounded">
-                {{ getCategoryLabel(req.category) }}
-              </span>
+              <span class="text-zinc-100 font-medium group-hover:text-indigo-400 transition-colors">{{ req.title }}</span>
+              <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{{ getCategoryLabel(req.category) }}</span>
             </div>
           </td>
-
-          <td class="px-6 py-5 text-center font-mono">
+          <td class="px-6 py-5 text-center">
             <span [ngClass]="{
-                    'text-blue-400 bg-blue-400/10 border-blue-400/20': req.priority === 0,
-                    'text-yellow-400 bg-yellow-400/10 border-yellow-400/20': req.priority === 1,
-                    'text-red-400 bg-red-400/10 border-red-400/20': req.priority === 2
-                  }" 
-                  class="text-[10px] px-2.5 py-1 rounded-md border font-bold uppercase tracking-widest">
+              'text-blue-400 border-blue-400/20 bg-blue-400/5': req.priority === 0,
+              'text-yellow-400 border-yellow-400/20 bg-yellow-400/5': req.priority === 1,
+              'text-red-400 border-red-400/20 bg-red-400/5': req.priority === 2
+            }" class="text-[9px] px-2 py-0.5 rounded border font-bold uppercase">
               {{ getPrioridadeLabel(req.priority) }}
             </span>
           </td>
-
           <td class="px-6 py-5">
-            <div class="flex items-center gap-3">
-              <span class="relative flex h-2 w-2">
-                <span [ngClass]="{
-                        'bg-yellow-400': req.status === 0,
-                        'bg-green-400': req.status === 1,
-                        'bg-red-400': req.status === 2
-                      }" 
-                      class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75">
-                </span>
-                <span [ngClass]="{
-                        'bg-yellow-500': req.status === 0,
-                        'bg-green-500': req.status === 1,
-                        'bg-red-500': req.status === 2
-                      }" 
-                      class="relative inline-flex rounded-full h-2 w-2">
-                </span>
-              </span>
-              
-              <span [ngClass]="{
-                      'text-yellow-500/90': req.status === 0,
-                      'text-green-500/90': req.status === 1,
-                      'text-red-500/90': req.status === 2
-                    }" 
-                    class="text-xs font-bold tracking-wide uppercase">
-                {{ getStatusLabel(req.status) }}
-              </span>
+            <div class="flex items-center gap-2">
+              <div [ngClass]="{
+                'bg-yellow-500': req.status === 0,
+                'bg-green-500': req.status === 1,
+                'bg-red-500': req.status === 2
+              }" class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]"></div>
+              <span class="text-xs font-bold text-zinc-400 uppercase tracking-tighter">{{ getStatusLabel(req.status) }}</span>
             </div>
           </td>
-
           <td class="px-6 py-5 text-right">
             <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button (click)="verDetalhe(req.id)" class="p-2 hover:bg-zinc-700 rounded-lg text-zinc-400 hover:text-white transition-colors">
-                <mat-icon class="!text[7px] w-5 h-5">visibility</mat-icon>
-              </button>
-              <button (click)="editar(req.id)" class="p-2 hover:bg-zinc-700 rounded-lg text-zinc-400 hover:text-blue-400 transition-colors">
-                <mat-icon class="!text[7px] w-5 h-5">edit_note</mat-icon>
-              </button>
-              <button (click)="remover(req.id)" class="p-2 hover:bg-zinc-700 rounded-lg text-zinc-400 hover:text-red-400 transition-colors">
-                <mat-icon class="!text[7px] w-5 h-5">delete</mat-icon>
+              <button (click)="verDetalhe(req.id)" class="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-white transition-colors">
+                <mat-icon class="!text-[20px]">visibility</mat-icon>
               </button>
             </div>
           </td>
@@ -129,11 +132,9 @@
     </table>
 
     <div *ngIf="!loading && requests.length === 0" class="py-24 text-center">
-      <div class="bg-zinc-800/30 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-zinc-800">
-        <mat-icon>assignment</mat-icon>
-      </div>
-      <h3 class="text-xl font-semibold text-zinc-200">Nenhum registro encontrado</h3>
-      <p class="text-zinc-500 text-sm mt-2 max-w-xs mx-auto">Sua lista está vazia.</p>
+      <mat-icon class="text-zinc-800 !text-5xl w-auto h-auto mb-4">search_off</mat-icon>
+      <h3 class="text-zinc-200 font-semibold">Nenhum resultado</h3>
+      <p class="text-zinc-500 text-sm">Não encontramos solicitações com esse termo.</p>
     </div>
   </div>
 </div>

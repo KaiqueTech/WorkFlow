@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{6ADC4AC6-BE37-2044-EB9C-30DD82199265}|WorkFlow.Api\\WorkFlow.Api.csproj|solutionrelative:workflow.api\\controllers\\requestcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{78BEA8A0-F58B-2395-444F-BF2CEA102102}|WorkFlow.Infra\\WorkFlow.Infra.csproj|d:\\pessoal\\kaique\\deal\\atividades\\workflow\\workflow.infra\\persistence\\read\\repositories\\requestqueriesrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{78BEA8A0-F58B-2395-444F-BF2CEA102102}|WorkFlow.Infra\\WorkFlow.Infra.csproj|solutionrelative:workflow.infra\\persistence\\read\\repositories\\requestqueriesrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{78BEA8A0-F58B-2395-444F-BF2CEA102102}|WorkFlow.Infra\\WorkFlow.Infra.csproj|d:\\pessoal\\kaique\\deal\\atividades\\workflow\\workflow.infra\\persistence\\write\\repositories\\requestrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{78BEA8A0-F58B-2395-444F-BF2CEA102102}|WorkFlow.Infra\\WorkFlow.Infra.csproj|solutionrelative:workflow.infra\\persistence\\write\\repositories\\requestrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -22,11 +26,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
+              "Title": "RequestQueriesRepository.cs",
+              "DocumentMoniker": "D:\\Pessoal\\Kaique\\Deal\\Atividades\\WorkFlow\\WorkFlow.Infra\\Persistence\\Read\\Repositories\\RequestQueriesRepository.cs",
+              "RelativeDocumentMoniker": "WorkFlow.Infra\\Persistence\\Read\\Repositories\\RequestQueriesRepository.cs",
+              "ToolTip": "D:\\Pessoal\\Kaique\\Deal\\Atividades\\WorkFlow\\WorkFlow.Infra\\Persistence\\Read\\Repositories\\RequestQueriesRepository.cs",
+              "RelativeToolTip": "WorkFlow.Infra\\Persistence\\Read\\Repositories\\RequestQueriesRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvw8AAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-14T23:43:14.704Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "IRequestRepository.cs",
               "DocumentMoniker": "D:\\Pessoal\\Kaique\\Deal\\Atividades\\WorkFlow\\WorkFlow.Domain\\Interfaces\\IRequestRepository.cs",
               "RelativeDocumentMoniker": "WorkFlow.Domain\\Interfaces\\IRequestRepository.cs",
@@ -34,8 +51,7 @@
               "RelativeToolTip": "WorkFlow.Domain\\Interfaces\\IRequestRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-14T21:26:42.025Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-14T21:26:42.025Z"
             },
             {
               "$type": "Document",
@@ -45,14 +61,14 @@
               "RelativeDocumentMoniker": "WorkFlow.Api\\Controllers\\RequestController.cs",
               "ToolTip": "D:\\Pessoal\\Kaique\\Deal\\Atividades\\WorkFlow\\WorkFlow.Api\\Controllers\\RequestController.cs",
               "RelativeToolTip": "WorkFlow.Api\\Controllers\\RequestController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAyAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABoAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-14T00:46:17.959Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "RequestRepository.cs",
               "DocumentMoniker": "D:\\Pessoal\\Kaique\\Deal\\Atividades\\WorkFlow\\WorkFlow.Infra\\Persistence\\Write\\Repositories\\RequestRepository.cs",
               "RelativeDocumentMoniker": "WorkFlow.Infra\\Persistence\\Write\\Repositories\\RequestRepository.cs",
@@ -60,8 +76,7 @@
               "RelativeToolTip": "WorkFlow.Infra\\Persistence\\Write\\Repositories\\RequestRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-14T00:39:44.872Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-14T00:39:44.872Z"
             }
           ]
         }

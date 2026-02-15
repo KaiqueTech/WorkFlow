@@ -14,7 +14,6 @@ import { MatIcon } from "@angular/material/icon";
 })
 export class NewRequest implements OnInit {
   requestForm: FormGroup;
-  isEditMode = false;
   requestId: string | null = null;
   loading = false;
 
@@ -36,7 +35,6 @@ export class NewRequest implements OnInit {
   ngOnInit() {
     this.requestId = this.route.snapshot.paramMap.get('id');
     if (this.requestId) {
-      this.isEditMode = true;
       this.carregarDadosParaEdicao(this.requestId);
     }
   }
@@ -56,26 +54,34 @@ export class NewRequest implements OnInit {
   }
 
   salvar() {
-    if (this.requestForm.invalid) return;
+  if (this.requestForm.invalid) return;
 
-    this.loading = true;
-    const dados = this.requestForm.value;
+  this.loading = true;
+  
+  const dadosBrutos = this.requestForm.value;
+  const payload = {
+    ...dadosBrutos,
+    priority: Number(dadosBrutos.priority),
+    category: Number(dadosBrutos.category),
+    status: Number(dadosBrutos.status)
+  };
 
-    const acao = this.isEditMode 
-      ? this.requestService.update(this.requestId!, dados) 
-      : this.requestService.create(dados);
-
-    acao.subscribe({
+  if (this.requestId) {
+    this.loading = false;
+  } else {
+    this.requestService.create(payload).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/home']);
       },
       error: (err) => {
         this.loading = false;
-        console.error('Erro ao salvar:', err);
+        console.error('Erro detalhado da API:', err.error?.errors);
+        alert('Erro ao salvar: Verifique os dados enviados.');
       }
     });
   }
+}
 
   cancelar() {
     this.router.navigate(['/home']);

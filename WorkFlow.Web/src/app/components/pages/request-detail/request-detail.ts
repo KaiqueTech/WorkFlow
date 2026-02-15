@@ -28,15 +28,15 @@ export class RequestDetail implements OnInit {
   isManager: boolean = false;
 
   readonly statusConfig: any = {
-    0: { label: 'Pendente', color: 'text-yellow-500', bg: 'bg-yellow-500/10', icon: 'schedule' },
-    1: { label: 'Aprovado', color: 'text-green-500', bg: 'bg-green-500/10', icon: 'check_circle' },
-    2: { label: 'Rejeitado', color: 'text-red-500', bg: 'bg-red-500/10', icon: 'cancel' }
+    0: { label: 'Pendente', color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+    1: { label: 'Aprovado', color: 'text-green-500', bg: 'bg-green-500/10' },
+    2: { label: 'Rejeitado', color: 'text-red-500', bg: 'bg-red-500/10' }
   };
 
   readonly priorityConfig: any = {
-    0: { label: 'Baixa', color: 'text-blue-400', icon: 'low_priority' },
-    1: { label: 'Média', color: 'text-yellow-400', icon: 'reorder' },
-    2: { label: 'Alta', color: 'text-red-400', icon: 'priority_high' }
+    0: { label: 'Baixa', color: 'text-blue-400' },
+    1: { label: 'Média', color: 'text-yellow-400' },
+    2: { label: 'Alta', color: 'text-red-400' }
   };
 
   readonly categoryMap: Record<number, string> = {

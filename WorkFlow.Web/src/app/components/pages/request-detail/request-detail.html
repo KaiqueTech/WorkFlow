@@ -13,7 +13,6 @@
 
         <div *ngIf="statusConfig[request.status]" 
              [class]="'px-4 py-2 rounded-lg border font-bold text-sm uppercase flex items-center gap-2 ' + statusConfig[request.status].bg + ' ' + statusConfig[request.status].color">
-          <mat-icon class="!text-[18px] w-[18px] h-[18px]">{{ statusConfig[request.status].icon }}</mat-icon>
           {{ statusConfig[request.status].label }}
         </div>
       </div>
@@ -29,7 +28,7 @@
       </div>
 
       <div class="space-y-2">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Descrição</label>
+        <label class="text-xs font-bold text-gray-500 uppercase ">Descrição</label>
         <p class="text-gray-300 leading-relaxed bg-black/30 p-4 rounded-lg border border-zinc-800">
           {{ request.description || 'Nenhuma descrição fornecida.' }}
         </p>
@@ -39,7 +38,7 @@
     
       <ng-container *ngIf="isManager">
         <button (click)="abrirModalDecisao(true)" class="bg-indigo-600 p-3 rounded-xl flex-1 text-white font-bold">
-          Aprovar (Como Gestor)
+          Aprovar
         </button>
         <button (click)="abrirModalDecisao(false)" class="bg-red-600 p-3 rounded-xl flex-1 text-white font-bold">
           Rejeitar
@@ -47,7 +46,7 @@
       </ng-container>
 
         <div *ngIf="!isManager" class="text-zinc-500 italic text-center w-full">
-          Aguardando aprovação (Sua role atual não permite editar)
+          Aguardando aprovação
         </div>
       </div>
     </div>
@@ -55,7 +54,7 @@
 
   <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
     <h3 class="text-lg font-bold text-white mb-8 flex items-center gap-2">
-      <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
+      <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
       Histórico de Alterações 
     </h3>
 
@@ -69,15 +68,15 @@
         <div [class]="'absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-zinc-900 ' + (statusConfig[step.toStatus]?.color || 'bg-zinc-500').replace('text', 'bg')"></div>
         
         <div class="flex flex-col">
-          <span [class]="'font-bold text-sm uppercase tracking-tight ' + (statusConfig[step.toStatus]?.color || 'text-white')">
+          <span [class]="'font-bold text-sm uppercase ' + (statusConfig[step.toStatus]?.color || 'text-white')">
             {{ statusConfig[step.toStatus]?.label || 'Alterado' }}
           </span>
-          <span class="text-gray-500 text-[10px] mb-2">{{ step.changedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="text-zinc-200 text-[10px] mb-2">{{ step.changedAt | date:'dd/MM/yyyy HH:mm' }}</span>
           
-          <div class="bg-black/50 p-3 rounded-lg border border-zinc-800/50">
-            <p class="text-gray-400 text-xs italic">"{{ step.comment || 'Sem observações.' }}"</p>
-            <p class="text-purple-400 text-[10px] mt-2 font-semibold flex items-center gap-1">
-              <mat-icon class="!text-[12px] w-3 h-3">person</mat-icon>
+          <div class="bg-black p-3 rounded-lg border border-zinc-800">
+            <p class="text-zinc-200 text-xs italic">"{{ step.comment || 'Sem observações.' }}"</p>
+            <p class="text-blue-400 text-[12px] mt-2 font-semibold flex items-center ">
+              <mat-icon class="!text-[19px]">person</mat-icon>
               {{ step.changedBy }}
             </p>
           </div>

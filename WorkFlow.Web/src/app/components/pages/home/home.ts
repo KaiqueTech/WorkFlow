@@ -15,6 +15,9 @@ export class Home implements OnInit {
   requests: any[] = [];
   loading: boolean = true;
   errorMessage: string = '';
+  paginaAtual: number = 0;
+  itensPorPagina: number = 10;
+  totalItens: number = 0;
 
   constructor(
     private requestService: RequestService, 
@@ -23,7 +26,6 @@ export class Home implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('Componente Home iniciado');
     this.carregarSolicitacoes();
   }
 
@@ -48,6 +50,66 @@ export class Home implements OnInit {
       }
     });
   }
+
+aoBuscar(event: any) {
+  const termo = event.target.value;
+  
+  this.requestService.getRequests(termo).subscribe({
+    next: (res: any) => {
+      this.requests = res.items || [];
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+filtroTexto: string = '';
+filtroStatus: string = '';
+filtroCategoria: string = '';
+filtroPrioridade: string = '';
+
+aplicarFiltros(resetarPagina: boolean = true) {
+  if(resetarPagina) this.paginaAtual = 0;
+  this.loading = true;
+  this.requestService.getRequests(
+    this.filtroTexto, 
+    this.filtroCategoria, 
+    this.filtroPrioridade,
+    this.filtroStatus,
+    this.paginaAtual
+  ).subscribe({
+    next: (res: any) => {
+      this.requests = res.items || [];
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+mudarPagina(novaPagina: number) {
+  console.log("indo para a pagina: ", novaPagina)
+  this.paginaAtual = novaPagina;
+  this.aplicarFiltros(false);
+}
+
+aoMudarTexto(event: any) {
+  this.filtroTexto = event.target.value;
+  this.aplicarFiltros();
+}
+
+aoMudarStatus(event: any){
+  this.filtroStatus = event.target.value;
+  this.aplicarFiltros();
+}
+
+aoMudarCategoria(event: any) {
+  this.filtroCategoria = event.target.value;
+  this.aplicarFiltros();
+}
+
+aoMudarPrioridade(event: any) {
+  this.filtroPrioridade = event.target.value;
+  this.aplicarFiltros();
+}
 
 getStatusLabel(status: number): string {
   switch (status) {
@@ -83,22 +145,6 @@ getCategoryLabel(category: number): string {
 
   verDetalhe(id: string) { 
     this.router.navigate(['/request-detail', id]);
-  }
-
-  editar(id: string) {
-    this.router.navigate(['/new-request', id]);
-  }
-
-  remover(id: string) {
-    if (confirm('Deseja realmente remover esta solicitação?')) {
-      this.requestService.delete(id).subscribe({
-        next: () => {
-          alert('Removido com sucesso!');
-          this.carregarSolicitacoes();
-        },
-        error: () => alert('Erro ao remover solicitação.')
-      });
-    }
   }
 
   logOut(){
