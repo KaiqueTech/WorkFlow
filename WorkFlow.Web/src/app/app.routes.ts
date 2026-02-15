@@ -24,6 +24,7 @@ export const routes: Routes = [
    {
         path:'new-request',
         canActivate: [authGuard],
+        data: {expectedRole: 'user'},
         loadComponent() {
             return import('./components/pages/new-request/new-request').then(m => m.NewRequest);
         }

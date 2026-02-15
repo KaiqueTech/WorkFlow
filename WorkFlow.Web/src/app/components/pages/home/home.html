@@ -7,7 +7,7 @@
     </div>
     
     <div class="flex items-center gap-3">
-      <button (click)="adicionarNova()" 
+      <button *ngIf="isUser" (click)="adicionarNova()" 
               class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
         <mat-icon>add_circle_outline</mat-icon>
         Nova Solicitação

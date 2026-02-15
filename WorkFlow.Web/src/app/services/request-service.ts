@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateRequest } from '../models/CreateRequestModel';
+import { CreateRequest } from '../models/RequestModel';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +11,10 @@ export class RequestService {
 
   constructor(private http: HttpClient) {}
 
-getRequests(termo?: string, category?: string, prioridade?: string, status?: string, page: number = 0): Observable<any> {
+getRequests(termo?: string, category?: string, prioridade?: string, status?: string, page: number = 0, pageSize: number = 10): Observable<any> {
   let params = new HttpParams()
     .set('Page', page.toString()) 
-    .set('PageSize', '10');
+    .set('PageSize', pageSize);
 
   if (termo?.trim()) params = params.set('SearchText', termo);
   if (status !== undefined && status !== null && status !== '') params = params.set('Status', status);

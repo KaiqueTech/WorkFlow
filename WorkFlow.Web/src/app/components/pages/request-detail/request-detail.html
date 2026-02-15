@@ -5,8 +5,8 @@
       
       <div class="flex justify-between items-start mb-6">
         <div>
-          <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-zinc-800 text-purple-400 border border-purple-500/30">
-            {{ categoryMap[request.category] || 'Categoria' }} 
+          <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-zinc-800 text-blue-400 border border-blue-500">
+            {{ categoryMap[request.category]}} 
           </span>
           <h1 class="text-3xl font-bold text-white mt-4">{{ request.title }}</h1>
         </div>
@@ -20,17 +20,17 @@
       <div class="grid grid-cols-2 gap-4 mb-8 text-sm">
         <div class="text-gray-400 flex items-center gap-2">
           Prioridade: 
-          <span [class]="'font-semibold ' + (priorityConfig[request.priority]?.color || 'text-white')">
-             {{ priorityConfig[request.priority]?.label || 'Normal' }}
+          <span [class]="'font-semibold ' + (priorityConfig[request.priority]?.color)">
+             {{ priorityConfig[request.priority]?.label}}
           </span>
         </div>
-        <div class="text-gray-400">Criado em: <span class="text-white font-semibold">{{ request.createdAt | date:'dd/MM/yyyy HH:mm' }}</span></div>
+        <div class="text-gray-400">Criado em: <span class="text-white font-semibold">{{ request.createdAt | date:'dd/MM/yyyy' }}</span></div>
       </div>
 
       <div class="space-y-2">
         <label class="text-xs font-bold text-gray-500 uppercase ">Descrição</label>
         <p class="text-gray-300 leading-relaxed bg-black/30 p-4 rounded-lg border border-zinc-800">
-          {{ request.description || 'Nenhuma descrição fornecida.' }}
+          {{ request.description}}
         </p>
       </div>
 
@@ -65,13 +65,13 @@
 
     <div class="relative border-l-2 border-zinc-800 ml-4 space-y-8 pb-4">
       <div *ngFor="let step of history" class="relative pl-8">
-        <div [class]="'absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-zinc-900 ' + (statusConfig[step.toStatus]?.color || 'bg-zinc-500').replace('text', 'bg')"></div>
+        <div [class]="'absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-zinc-900 ' + (statusConfig[step.toStatus]?.color).replace('text', 'bg')"></div>
         
         <div class="flex flex-col">
-          <span [class]="'font-bold text-sm uppercase ' + (statusConfig[step.toStatus]?.color || 'text-white')">
-            {{ statusConfig[step.toStatus]?.label || 'Alterado' }}
+          <span [class]="'font-bold text-sm uppercase ' + (statusConfig[step.toStatus]?.color)">
+            {{ statusConfig[step.toStatus]?.label}}
           </span>
-          <span class="text-zinc-200 text-[10px] mb-2">{{ step.changedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="text-zinc-200 text-[10px] mb-2">{{ step.changedAt | date:'dd/MM/yyyy' }}</span>
           
           <div class="bg-black p-3 rounded-lg border border-zinc-800">
             <p class="text-zinc-200 text-xs italic">"{{ step.comment || 'Sem observações.' }}"</p>

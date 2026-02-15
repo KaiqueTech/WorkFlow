@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { tap } from 'rxjs';
+import { LoginResponse } from '../models/LoginModel';
 
 @Injectable({
   providedIn: 'root',
@@ -10,10 +11,9 @@ export class LoginService {
 
   constructor(private http: HttpClient) {}
 
-  login(credentials: any) {
-    return this.http.post<any>(`${this.API_URL}/login`, credentials).pipe(
+  login(login: LoginResponse) {
+    return this.http.post<any>(`${this.API_URL}/login`, login).pipe(
       tap(res => {
-        // Armazena o token JWT
         localStorage.setItem('token', res.token);
       })
     );
@@ -37,5 +37,10 @@ export class LoginService {
   isManager(): boolean {
     const role = this.getUserRole();
     return role === 'manager';
+  }
+
+  isUser(): boolean {
+    const role = this.getUserRole();
+    return role === 'user'
   }
 }

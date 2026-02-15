@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core'; 
 import { Router } from '@angular/router';
 import { RequestService } from '../../../services/request-service';
 import { MatIcon } from '@angular/material/icon';
+import { LoginService } from '../../../services/login-service';
 
 @Component({
   selector: 'app-home',
@@ -12,8 +13,14 @@ import { MatIcon } from '@angular/material/icon';
   styleUrl: './home.css',
 })
 export class Home implements OnInit {
+  private requestService = inject(RequestService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+  private auth = inject(LoginService);
+
   requests: any[] = [];
   loading: boolean = true;
+  isUser: boolean = false;
   errorMessage: string = '';
   paginaAtual: number = 0;
   itensPorPagina: number = 10;
@@ -25,21 +32,14 @@ export class Home implements OnInit {
   filtroPrioridade: string = '';
   readonly Math = Math;
 
-
-  constructor(
-    private requestService: RequestService, 
-    private router: Router,
-    private cdr: ChangeDetectorRef
-  ) {}
-
   ngOnInit() {
-    console.log("home carregou aqui");
     this.carregarSolicitacoes();
+
+    this.isUser = this.auth.isUser();
   }
 
 
 private processarSucesso(res: any) {
-  console.log('1. Chegou no processarSucesso:', res);
   
   this.requests = [...(res?.items || [])]; 
   this.totalItens = res?.totalCount || 0; 
@@ -49,20 +49,19 @@ private processarSucesso(res: any) {
   this.cdr.markForCheck(); 
   this.cdr.detectChanges();
   
-  console.log('2. Variáveis atualizadas:', this.requests, this.totalItens);
 }
 
 carregarSolicitacoes() {
   this.loading = true;
 
-  const p = {
-    t: this.filtroTexto?.trim() || undefined,
-    c: this.filtroCategoria || undefined,
-    pr: this.filtroPrioridade || undefined,
-    s: this.filtroStatus || undefined
+  const pagina = {
+    termo: this.filtroTexto?.trim() || undefined,
+    category: this.filtroCategoria || undefined,
+    prioridade: this.filtroPrioridade || undefined,
+    status: this.filtroStatus || undefined
   };
 
-  this.requestService.getRequests(p.t, p.c, p.pr, p.s, this.paginaAtual)
+  this.requestService.getRequests(pagina.termo,pagina.category,pagina.prioridade,pagina.status, this.paginaAtual)
     .subscribe({
       next: (res: any) => this.processarSucesso(res),
       error: () => { this.loading = false; this.cdr.detectChanges(); }
@@ -99,33 +98,40 @@ carregarSolicitacoes() {
     this.aplicarFiltros(false);
   }
 
-  getStatusLabel(status: any): string {
-    const s = Number(status);
-    if (s === 0) return 'Pendente';
-    if (s === 1) return 'Aprovado';
-    if (s === 2) return 'Rejeitado';
-    return 'Desconhecido';
+  getStatusLabel(status: number): string {
+    switch(status){
+    case 0: return 'Pendente';
+    case 1: return 'Aprovado';
+    case 2: return 'Rejeitado'
+    default: return 'Desconhecido'
+    }
   }
 
-  getPrioridadeLabel(priority: any): string {
-    const p = Number(priority);
-    if (p === 0) return 'BAIXA';
-    if (p === 1) return 'MÉDIA';
-    if (p === 2) return 'ALTA';
-    return 'Desconhecido';
+  getPrioridadeLabel(priority: number): string {
+    switch(priority){
+    case 0: return 'BAIXA';
+    case 1: return 'MÉDIA';
+    case 2: return 'ALTA';
+    default: return 'Desconhecido';
+    }
+ 
   }
 
-  getCategoryLabel(category: any): string {
-    const c = Number(category);
-    if (c === 1) return 'COMPRAS';
-    if (c === 2) return 'TI';
-    if (c === 3) return 'REEMBOLSO';
-    if (c === 4) return 'OUTROS';
-    return 'Desconhecido';
+  getCategoryLabel(category: number): string {
+      switch(category){
+      case 1: return 'COMPRAS';
+      case 2: return 'TI';
+      case 3: return 'REEMBOLSO';
+      case 4: return 'OUTROS';
+      default: return'Desconhecido';
+    }
+
   }
 
   adicionarNova() {
+    if(this.isUser){
     this.router.navigate(['/new-request']);
+    }
   }
 
   verDetalhe(id: string) { 

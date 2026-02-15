@@ -19,7 +19,7 @@ export class RequestDetail implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private auth = inject(LoginService)
 
-  request: any;
+  request?: any;
   history: any[] = [];
   requestId: string | null = null;
   loading: boolean = true;
@@ -51,7 +51,7 @@ export class RequestDetail implements OnInit {
     this.carregarDados();
 }
 
-  carregarDados() {
+    carregarDados() {
     this.loading = true;
     this.errorMessage = '';
 
@@ -93,7 +93,6 @@ export class RequestDetail implements OnInit {
 
   abrirModalDecisao(isApprove: boolean) {
     if (!this.isManager) {
-      alert('Apenas gestores podem aprovar ou rejeitar solicitações.');
       return;
     }
 
