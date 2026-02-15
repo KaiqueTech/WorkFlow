@@ -13,13 +13,13 @@ export class RequestService {
 
 getRequests(termo?: string, category?: string, prioridade?: string, status?: string, page: number = 0): Observable<any> {
   let params = new HttpParams()
-    .set('Page', (page + 1).toString())
+    .set('Page', page.toString()) 
     .set('PageSize', '10');
 
-  if (termo) params = params.set('SearchText', termo);
-  if (status) params = params.set('Status', status);
-  if (prioridade) params = params.set('Priority', prioridade);
-  if (category && category !== '0') params = params.set('Category', category);
+  if (termo?.trim()) params = params.set('SearchText', termo);
+  if (status !== undefined && status !== null && status !== '') params = params.set('Status', status);
+  if (prioridade !== undefined && prioridade !== null && prioridade !== '') params = params.set('Priority', prioridade);
+  if (category && category !== '0' && category !== '') params = params.set('Category', category);
 
   return this.http.get<any>(`${this.API}/search`, { params });
 }

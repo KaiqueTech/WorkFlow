@@ -19,6 +19,13 @@ export class Home implements OnInit {
   itensPorPagina: number = 10;
   totalItens: number = 0;
 
+  filtroTexto: string = '';
+  filtroStatus: string = '';
+  filtroCategoria: string = '';
+  filtroPrioridade: string = '';
+  readonly Math = Math;
+
+
   constructor(
     private requestService: RequestService, 
     private router: Router,
@@ -26,118 +33,96 @@ export class Home implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log("home carregou aqui");
     this.carregarSolicitacoes();
   }
 
-  carregarSolicitacoes() {
-    this.loading = true;
-    this.errorMessage = '';
 
-    this.requestService.getRequests().subscribe({
-      next: (res: any) => {
-        
-        this.requests = res.items || (Array.isArray(res) ? res : []);
-        
-        this.loading = false;
-        
-        this.cdr.detectChanges(); 
-        
-      },
-      error: (err) => {
-        this.errorMessage = "Erro na comunicação com a API.";
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-aoBuscar(event: any) {
-  const termo = event.target.value;
+private processarSucesso(res: any) {
+  console.log('1. Chegou no processarSucesso:', res);
   
-  this.requestService.getRequests(termo).subscribe({
-    next: (res: any) => {
-      this.requests = res.items || [];
-      this.cdr.detectChanges();
-    }
-  });
+  this.requests = [...(res?.items || [])]; 
+  this.totalItens = res?.totalCount || 0; 
+
+  this.loading = false;
+  
+  this.cdr.markForCheck(); 
+  this.cdr.detectChanges();
+  
+  console.log('2. Variáveis atualizadas:', this.requests, this.totalItens);
 }
 
-filtroTexto: string = '';
-filtroStatus: string = '';
-filtroCategoria: string = '';
-filtroPrioridade: string = '';
-
-aplicarFiltros(resetarPagina: boolean = true) {
-  if(resetarPagina) this.paginaAtual = 0;
+carregarSolicitacoes() {
   this.loading = true;
-  this.requestService.getRequests(
-    this.filtroTexto, 
-    this.filtroCategoria, 
-    this.filtroPrioridade,
-    this.filtroStatus,
-    this.paginaAtual
-  ).subscribe({
-    next: (res: any) => {
-      this.requests = res.items || [];
-      this.loading = false;
-      this.cdr.detectChanges();
-    }
-  });
+
+  const p = {
+    t: this.filtroTexto?.trim() || undefined,
+    c: this.filtroCategoria || undefined,
+    pr: this.filtroPrioridade || undefined,
+    s: this.filtroStatus || undefined
+  };
+
+  this.requestService.getRequests(p.t, p.c, p.pr, p.s, this.paginaAtual)
+    .subscribe({
+      next: (res: any) => this.processarSucesso(res),
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
+    });
 }
 
-mudarPagina(novaPagina: number) {
-  console.log("indo para a pagina: ", novaPagina)
-  this.paginaAtual = novaPagina;
-  this.aplicarFiltros(false);
-}
-
-aoMudarTexto(event: any) {
-  this.filtroTexto = event.target.value;
-  this.aplicarFiltros();
-}
-
-aoMudarStatus(event: any){
-  this.filtroStatus = event.target.value;
-  this.aplicarFiltros();
-}
-
-aoMudarCategoria(event: any) {
-  this.filtroCategoria = event.target.value;
-  this.aplicarFiltros();
-}
-
-aoMudarPrioridade(event: any) {
-  this.filtroPrioridade = event.target.value;
-  this.aplicarFiltros();
-}
-
-getStatusLabel(status: number): string {
-  switch (status) {
-    case 0: return 'Pendente';
-    case 1: return 'Aprovado';
-    case 2: return 'Rejeitado';
-    default: return 'Desconhecido';
+  aplicarFiltros(resetarPagina: boolean = true) {
+    if (resetarPagina) this.paginaAtual = 0;
+    this.carregarSolicitacoes(); 
   }
-}
 
-getPrioridadeLabel(priority: number): string {
-  switch (priority) {
-    case 0: return 'BAIXA';
-    case 1: return 'MÉDIA';
-    case 2: return 'ALTA';
-    default: return 'Desconhecido';
+  aoBuscar(event: any) {
+    this.filtroTexto = event.target.value;
+    this.aplicarFiltros();
   }
-}
 
-getCategoryLabel(category: number): string {
-  switch (category) {
-    case 1: return 'COMPRAS';
-    case 2: return 'TI';
-    case 3: return 'REEMBOLSO';
-    case 4: return 'OUTROS';
-    default: return 'Desconhecido';
+  aoMudarStatus(event: any){
+    this.filtroStatus = event.target.value;
+    this.aplicarFiltros();
   }
-}
+
+  aoMudarCategoria(event: any) {
+    this.filtroCategoria = event.target.value;
+    this.aplicarFiltros();
+  }
+
+  aoMudarPrioridade(event: any) {
+    this.filtroPrioridade = event.target.value;
+    this.aplicarFiltros();
+  }
+
+  mudarPagina(novaPagina: number) {
+    this.paginaAtual = novaPagina;
+    this.aplicarFiltros(false);
+  }
+
+  getStatusLabel(status: any): string {
+    const s = Number(status);
+    if (s === 0) return 'Pendente';
+    if (s === 1) return 'Aprovado';
+    if (s === 2) return 'Rejeitado';
+    return 'Desconhecido';
+  }
+
+  getPrioridadeLabel(priority: any): string {
+    const p = Number(priority);
+    if (p === 0) return 'BAIXA';
+    if (p === 1) return 'MÉDIA';
+    if (p === 2) return 'ALTA';
+    return 'Desconhecido';
+  }
+
+  getCategoryLabel(category: any): string {
+    const c = Number(category);
+    if (c === 1) return 'COMPRAS';
+    if (c === 2) return 'TI';
+    if (c === 3) return 'REEMBOLSO';
+    if (c === 4) return 'OUTROS';
+    return 'Desconhecido';
+  }
 
   adicionarNova() {
     this.router.navigate(['/new-request']);
@@ -148,10 +133,7 @@ getCategoryLabel(category: number): string {
   }
 
   logOut(){
-    localStorage.removeItem('token');
-
     localStorage.clear();
-
     this.router.navigate(['/login']);
   }
 }
