@@ -2,8 +2,15 @@
   
   <div class="lg:col-span-2 space-y-6">
     <div class="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-xl">
-      
+      <div>
+        <button (click)="voltar()" class="text-zinc-500 hover:text-zinc-300 flex items-center gap-2 mb-4 cursor-pointer">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar
+      </button>
+      </div>
+
       <div class="flex justify-between items-start mb-6">
+        
         <div>
           <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-zinc-800 text-blue-400 border border-blue-500">
             {{ categoryMap[request.category]}} 
@@ -55,7 +62,7 @@
   <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
     <h3 class="text-lg font-bold text-white mb-8 flex items-center gap-2">
       <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
-      Histórico de Alterações 
+      Histórico de Alterações - {{requestId}}
     </h3>
 
     <div *ngIf="history.length === 0" class="text-center py-10">

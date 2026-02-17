@@ -1,17 +1,19 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { tap } from 'rxjs';
-import { LoginResponse } from '../models/LoginModel';
+import { LoginRequest } from '../models/LoginModel';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoginService {
   private readonly API_URL = 'http://localhost:5020/api/auth';
+  private router = inject(Router)
 
   constructor(private http: HttpClient) {}
 
-  login(login: LoginResponse) {
+  login(login: LoginRequest) {
     return this.http.post<any>(`${this.API_URL}/login`, login).pipe(
       tap(res => {
         localStorage.setItem('token', res.token);
@@ -26,7 +28,7 @@ export class LoginService {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       
-      const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload.role;
+      const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ?? payload.role;
       
       return role ? role.toString().toLowerCase() : '';
     } catch {

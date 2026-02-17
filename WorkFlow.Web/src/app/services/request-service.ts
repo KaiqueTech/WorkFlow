@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CreateRequest } from '../models/RequestModel';
@@ -8,12 +8,11 @@ import { CreateRequest } from '../models/RequestModel';
 })
 export class RequestService {
   private readonly API = 'http://localhost:5020/api/request'; 
-
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
 getRequests(termo?: string, category?: string, prioridade?: string, status?: string, page: number = 0, pageSize: number = 10): Observable<any> {
   let params = new HttpParams()
-    .set('Page', page.toString()) 
+    .set('Page', page) 
     .set('PageSize', pageSize);
 
   if (termo?.trim()) params = params.set('SearchText', termo);

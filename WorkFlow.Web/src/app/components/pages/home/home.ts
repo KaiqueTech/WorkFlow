@@ -48,7 +48,6 @@ private processarSucesso(res: any) {
   
   this.cdr.markForCheck(); 
   this.cdr.detectChanges();
-  
 }
 
 carregarSolicitacoes() {
