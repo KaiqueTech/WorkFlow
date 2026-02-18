@@ -10,7 +10,6 @@ public static class SeedData
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUserModel>>();
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // 🔹 Criar todas as roles do enum
         foreach (var roleName in Enum.GetNames(typeof(UserRoleEnum)))
         {
             if (!await roleManager.RoleExistsAsync(roleName))
@@ -55,7 +54,7 @@ public static class SeedData
                 EmailConfirmed = true
             };
 
-            var result = await userManager.CreateAsync(user, "Solicitante@123");
+            var result = await userManager.CreateAsync(user, "User@123");
 
             if (result.Succeeded)
             {

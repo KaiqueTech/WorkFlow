@@ -1,8 +1,10 @@
 ﻿using Dapper;
 using System.Text;
+using WorkFlow.Application.Abstractions;
 using WorkFlow.Application.DTOs;
-using WorkFlow.Application.Interfaces;
 using WorkFlow.Application.Queries;
+using WorkFlow.Application.Queries.Filters;
+using WorkFlow.Application.Queries.Results;
 
 namespace WorkFlow.Infra.Persistence.Read.Repositories
 {

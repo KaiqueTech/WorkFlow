@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
-using WorkFlow.Application.Interfaces;
+using WorkFlow.Application.Abstractions;
 
 namespace WorkFlow.Infra.Persistence.Read.Connection
 {

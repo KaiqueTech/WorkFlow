@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WorkFlow.Application.Abstractions;
 using WorkFlow.Application.Interfaces;
 using WorkFlow.Application.Queries;
 using WorkFlow.Application.Settings;

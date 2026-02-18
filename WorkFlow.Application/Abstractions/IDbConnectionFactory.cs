@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace WorkFlow.Application.Interfaces
+namespace WorkFlow.Application.Abstractions
 {
     public interface IDbConnectionFactory
     {

@@ -1,4 +1,6 @@
 ﻿using WorkFlow.Application.DTOs;
+using WorkFlow.Application.Queries.Filters;
+using WorkFlow.Application.Queries.Results;
 
 namespace WorkFlow.Application.Queries
 {
@@ -6,7 +8,6 @@ namespace WorkFlow.Application.Queries
     {
         Task<PagedResult<RequestListingDto>> GetFilteredRequestsAsync(RequestFilter filter, string userId, string role);
 
-        // Detalhes para a Timeline (Completa)
         Task<RequestDetailDto?> GetDetailByIdAsync(Guid requestId);
 
         Task<IEnumerable<RequestHistoryDto>> GetRequestHistoryAsync(Guid requestId, string userId, string role);
